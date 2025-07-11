@@ -1,0 +1,554 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alex Johnson - Creative Developer Portfolio</title>
+    <meta name="author" content="Van Jasper Benzon" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+
+    <meta property="og:title" content="Alex Johnson - Creative Developer Portfolio" />
+    <meta property="og:description" content="Creative Full-Stack Developer & UI/UX Designer" />
+    <meta property="og:type" content="website" />
+  </head>
+
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <a href="#home">
+            <span class="logo-text">V-J</span>
+          </a>
+        </div>
+        
+        <ul class="nav-menu" id="nav-menu">
+          <li class="nav-item">
+            <a href="#home" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="#about" class="nav-link">About</a>
+          </li>
+          <li class="nav-item">
+            <a href="#projects" class="nav-link">Projects</a>
+          </li>
+          <li class="nav-item">
+            <a href="#skills" class="nav-link">Skills</a>
+          </li>
+          <li class="nav-item">
+            <a href="#contact" class="nav-link">Contact</a>
+          </li>
+        </ul>
+
+        <div class="nav-controls">
+          <div class="theme-toggle" id="theme-toggle">
+            <i class="fas fa-sun"></i>
+            <i class="fas fa-moon"></i>
+          </div>
+          
+          <div class="hamburger" id="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="hero-container">
+        <div class="hero-content" data-aos="fade-up" data-aos-duration="1000">
+          <div class="hero-text">
+            <h1 class="hero-title">
+              Hi, I'm <span class="gradient-text">Van Jasper Benzon</span>
+            </h1>
+            <h2 class="hero-subtitle">Aspiring Web Developer</h2>
+            <p class="hero-description">
+              I’m an entry-level developer passionate about building simple, user-friendly websites using HTML, PHP, and MySQL. I enjoy learning new technologies and turning ideas into working solutions.
+            </p>
+            <div class="hero-buttons">
+              <a href="#projects" class="btn btn-primary">
+                <span>View My Work</span>
+                <i class="fas fa-arrow-right"></i>
+              </a>
+              <a href="#contact" class="btn btn-secondary">
+                <span>Get In Touch</span>
+                <i class="fas fa-paper-plane"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="hero-visual" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
+          <div class="floating-card">
+            <div class="card-glow"></div>
+            <div class="code-snippet">
+              <div class="code-header">
+                <div class="code-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+              <div class="code-content">
+                <div class="code-line">
+                  <span class="code-keyword">const</span>
+                  <span class="code-variable">developer</span>
+                  <span class="code-operator">=</span>
+                  <span class="code-bracket">{</span>
+                </div>
+                <div class="code-line">
+                  <span class="code-property">name:</span>
+                  <span class="code-string">'Van Jasper Benzon'</span>,
+                </div>
+              <div class="code-line">
+  <span class="code-property">skills:</span>
+  <span class="code-bracket">[</span>
+  <span class="code-string">'HTML'</span>, 
+  <span class="code-string">'CSS'</span>, 
+  <span class="code-string">'PHP'</span>, 
+  <span class="code-string">'Java'</span>, 
+  <span class="code-string">'MySQL'</span>, 
+  <span class="code-string">'Basic Troubleshooting'</span>
+  <span class="code-bracket">]</span>,
+</div>
+
+                <div class="code-line">
+  <span class="code-property">passion:</span>
+  <span class="code-string">'Building Functional and User-Friendly Websites'</span>
+</div>
+
+                <div class="code-line">
+                  <span class="code-bracket">}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="scroll-indicator" data-aos="fade-up" data-aos-delay="1500">
+        <div class="scroll-mouse">
+          <div class="scroll-wheel"></div>
+        </div>
+        <span>Scroll Down</span>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+      <div class="container">
+        <div class="section-header" data-aos="fade-up">
+          <h2 class="section-title">About Me</h2>
+          <p class="section-subtitle">Get to know more about who I am and what I do</p>
+        </div>
+        
+        <div class="about-content">
+          <div class="about-image" data-aos="fade-right" data-aos-duration="1000">
+            <div class="image-container">
+              <img src="prof.jpg" alt="Van Jasper Benzon" class="profile-image">
+              <div class="image-overlay"></div>
+            </div>
+          </div>
+          
+          <div class="about-text" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
+  <h3>Aspiring Developer & Tech Enthusiast</h3>
+  <p>
+    I’m a recent IT graduate with a strong foundation in web development and a growing passion for clean, user-friendly design. 
+    I enjoy creating simple yet effective digital experiences using HTML, PHP, Java, and MySQL.
+  </p>
+  <p>
+    My journey started with a curiosity for how websites and systems work, which led me to explore both front-end and back-end development. 
+    I’m eager to keep learning and apply my skills to real-world projects that make a difference.
+  </p>
+
+
+            <div class="about-stats">
+  <div class="stat-item">
+    <span class="stat-number">10+</span>
+    <span class="stat-label">Academic Projects</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">1</span>
+    <span class="stat-label">Year of Hands-On Learning</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">100%</span>
+    <span class="stat-label">Passion for Growth</span>
+  </div>
+</div>
+
+            
+            <div class="about-buttons">
+              <a href="#contact" class="btn btn-primary">
+                <span>Hire Me</span>
+                <i class="fas fa-user-plus"></i>
+              </a>
+           
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+<section class="projects" id="projects">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <h2 class="section-title">Featured Projects</h2>
+      <p class="section-subtitle">Some of the projects I built during my academic journey</p>
+    </div>
+    
+    <div class="projects-grid">
+      <!-- Project 1 -->
+      <div class="project-card" data-aos="fade-up" data-aos-duration="800">
+        <div class="project-image">
+          <img src="st.webp" alt="Student Information System">
+          <div class="project-overlay">
+            <div class="project-links">
+              <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+              <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="project-content">
+          <h3 class="project-title">Student Information System</h3>
+          <p class="project-description">
+            A PHP and MySQL-based system that allows admin users to manage student records including enrollment, grades, and profiles.
+          </p>
+          <div class="project-tech">
+            <span class="tech-tag">PHP</span>
+            <span class="tech-tag">MySQL</span>
+            <span class="tech-tag">HTML/CSS</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 2 -->
+      <div class="project-card" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
+        <div class="project-image">
+          <img src="pos.webp" alt="Simple POS System">
+          <div class="project-overlay">
+            <div class="project-links">
+              <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+              <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="project-content">
+          <h3 class="project-title">Simple POS System</h3>
+          <p class="project-description">
+            A basic Point-of-Sale system for a small store, with product listing, cart management, and sales reporting functionality.
+          </p>
+          <div class="project-tech">
+            <span class="tech-tag">HTML</span>
+            <span class="tech-tag">PHP</span>
+            <span class="tech-tag">MySQL</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 3 -->
+      <div class="project-card" data-aos="fade-up" data-aos-duration="800" data-aos-delay="400">
+        <div class="project-image">
+          <img src="java.png" alt="Java Calculator App">
+          <div class="project-overlay">
+            <div class="project-links">
+              <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+              <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="project-content">
+          <h3 class="project-title">Java Calculator App</h3>
+          <p class="project-description">
+            A basic calculator desktop application developed in Java with GUI using Swing, capable of performing standard arithmetic operations.
+          </p>
+          <div class="project-tech">
+            <span class="tech-tag">Java</span>
+            <span class="tech-tag">Swing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <!-- Skills Section -->
+<section class="skills" id="skills">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <h2 class="section-title">Skills & Expertise</h2>
+      <p class="section-subtitle">Technologies and tools I’ve learned and worked with</p>
+    </div>
+    
+    <div class="skills-content">
+      <div class="skills-categories">
+        
+        <!-- Frontend Development -->
+        <div class="skill-category" data-aos="fade-up" data-aos-duration="800">
+          <div class="category-header">
+            <i class="fas fa-code"></i>
+            <h3>Frontend Development</h3>
+          </div>
+          <div class="skills-list">
+            <div class="skill-item">
+              <div class="skill-info">
+                <span class="skill-name">HTML5</span>
+                <span class="skill-percentage">90%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" data-width="90%"></div>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-info">
+                <span class="skill-name">CSS3</span>
+                <span class="skill-percentage">85%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" data-width="85%"></div>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-info">
+                <span class="skill-name">Basic JavaScript</span>
+                <span class="skill-percentage">70%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" data-width="70%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backend Development -->
+        <div class="skill-category" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
+          <div class="category-header">
+            <i class="fas fa-server"></i>
+            <h3>Backend Development</h3>
+          </div>
+          <div class="skills-list">
+            <div class="skill-item">
+              <div class="skill-info">
+                <span class="skill-name">PHP</span>
+                <span class="skill-percentage">80%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" data-width="80%"></div>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-info">
+                <span class="skill-name">Java</span>
+                <span class="skill-percentage">75%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" data-width="75%"></div>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-info">
+                <span class="skill-name">MySQL</span>
+                <span class="skill-percentage">85%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" data-width="85%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tools & Troubleshooting -->
+        <div class="skill-category" data-aos="fade-up" data-aos-duration="800" data-aos-delay="400">
+          <div class="category-header">
+            <i class="fas fa-tools"></i>
+            <h3>Tools & Troubleshooting</h3>
+          </div>
+          <div class="skills-list">
+            <div class="skill-item">
+              <div class="skill-info">
+                <span class="skill-name">Visual Studio Code / NetBeans</span>
+                <span class="skill-percentage">85%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" data-width="85%"></div>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-info">
+                <span class="skill-name">XAMPP / phpMyAdmin</span>
+                <span class="skill-percentage">80%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" data-width="80%"></div>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-info">
+                <span class="skill-name">Basic PC Troubleshooting</span>
+                <span class="skill-percentage">75%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" data-width="75%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+    <div class="container">
+  <div class="section-header" data-aos="fade-up">
+    <h2 class="section-title">Let’s Work Together</h2>
+    <p class="section-subtitle">I’m open to internships, freelance projects, or collaborations. Let’s build something great together!</p>
+  </div>
+
+        
+        <div class="contact-content">
+  <div class="contact-info" data-aos="fade-right" data-aos-duration="1000">
+    <h3>Get In Touch</h3>
+    <p>
+      I'm open to opportunities, internships, freelance work, or simply connecting with fellow developers and tech enthusiasts. 
+      Whether you have a project idea or just want to chat, feel free to drop a message!
+    </p>
+            
+            <div class="contact-details">
+              <div class="contact-item">
+                <div class="contact-icon">
+                  <i class="fas fa-envelope"></i>
+                </div>
+                <div class="contact-text">
+                  <h4>Email</h4>
+                  <p>balandoy18@gmail.com</p>
+                </div>
+              </div>
+              
+              <div class="contact-item">
+                <div class="contact-icon">
+                  <i class="fas fa-phone"></i>
+                </div>
+                <div class="contact-text">
+                  <h4>Phone</h4>
+                  <p>+6393 0093 0835</p>
+                  <p>+6399 2261 1995</p>
+                </div>
+              </div>
+              
+              <div class="contact-item">
+                <div class="contact-icon">
+                  <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="contact-text">
+                  <h4>Location</h4>
+                  <p>Purok 2, Gabao Irosin Sorsogon</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="social-links">
+              <a href="#" class="social-link">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+              <a href="#" class="social-link">
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="#" class="social-link">
+                <i class="fab fa-twitter"></i>
+              </a>
+              <a href="#" class="social-link">
+                <i class="fab fa-dribbble"></i>
+              </a>
+            </div>
+          </div>
+          
+          <div class="contact-form" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
+            <form action="https://formspree.io/f/your-form-id" method="POST" id="contact-form">
+              <div class="form-group">
+                <input type="text" name="name" id="name" required>
+                <label for="name">Your Name</label>
+              </div>
+              
+              <div class="form-group">
+                <input type="email" name="email" id="email" required>
+                <label for="email">Your Email</label>
+              </div>
+              
+              <div class="form-group">
+                <input type="text" name="subject" id="subject" required>
+                <label for="subject">Subject</label>
+              </div>
+              
+              <div class="form-group">
+                <textarea name="message" id="message" rows="5" required></textarea>
+                <label for="message">Your Message</label>
+              </div>
+              
+              <button type="submit" class="btn btn-primary btn-full">
+                <span>Send Message</span>
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-logo">
+            <span class="logo-text">AJ</span>
+          </div>
+          <p class="footer-text">
+            Thanks for visiting my portfolio. Let's create something amazing together!
+          </p>
+          <div class="footer-social">
+            <a href="#" class="www.linkedin.com/in/van-jasper-benzon-626445278">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+            <a href="https://github.com/darkvj25" class="social-link">
+              <i class="fab fa-github"></i>
+            </a>
+          <a href="https://www.facebook.com/benzonvanjasper" class="social-link">
+  <i class="fab fa-facebook"></i>
+</a>
+
+          
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2024 Alex Johnson. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+  </body>
+</html>
