@@ -10,7 +10,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -27,6 +27,26 @@
   </head>
 
   <body>
+    <!-- Page Loader / Entrance Animation -->
+    <div class="loader" id="loader">
+      <div class="loader-bg"></div>
+      <div class="loader-content">
+        <div class="loader-logo">
+          <span class="logo-text" data-text="V-J">V-J</span>
+        </div>
+        <div class="loader-status">INITIALIZING SYSTEM...</div>
+        <div class="loader-bar-container">
+          <div class="loader-bar"></div>
+          <div class="loader-glitch"></div>
+        </div>
+        <div class="loader-percentage">0%</div>
+      </div>
+    </div>
+
+    <!-- Custom Cursor Elements -->
+    <div class="custom-cursor"></div>
+    <div class="cursor-follower"></div>
+
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
       <div class="nav-container">
@@ -71,8 +91,18 @@
 
     <!-- Hero Section -->
     <section class="hero" id="home">
+      <!-- Parallax Background Image -->
+      <div class="hero-image-bg parallax-shape" data-speed="0.1">
+        <img src="workspace.png" alt="Developer Workspace">
+      </div>
+
+      <!-- Parallax Background Shapes -->
+      <div class="parallax-shape shape-1" data-speed="0.1"></div>
+      <div class="parallax-shape shape-2" data-speed="0.2"></div>
+      <div class="parallax-shape shape-3" data-speed="0.15"></div>
+
       <div class="hero-container">
-        <div class="hero-content" data-aos="fade-up" data-aos-duration="1000">
+        <div class="hero-content" data-aos="fade-up" data-aos-duration="1000" data-speed="0.4">
           <div class="hero-text">
             <h1 class="hero-title">
               Hi, I'm <span class="gradient-text">Van Jasper Benzon</span>
@@ -86,18 +116,19 @@
                 <span>View My Work</span>
                 <i class="fas fa-arrow-right"></i>
               </a>
-              <a href="#contact" class="btn btn-secondary">
-                <span>Get In Touch</span>
-                <i class="fas fa-paper-plane"></i>
+              <a href="path-to-your-resume.pdf" class="btn btn-secondary" target="_blank">
+                <i class="fas fa-file-download"></i>
+                <span>Download CV</span>
               </a>
             </div>
           </div>
         </div>
         
         <div class="hero-visual" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
-          <div class="floating-card">
-            <div class="card-glow"></div>
-            <div class="code-snippet">
+          <div class="floating-card-wrapper">
+            <div class="floating-card">
+              <div class="card-glow"></div>
+              <div class="code-snippet">
               <div class="code-header">
                 <div class="code-dots">
                   <span></span>
@@ -116,17 +147,16 @@
                   <span class="code-property">name:</span>
                   <span class="code-string">'Van Jasper Benzon'</span>,
                 </div>
-              <div class="code-line">
-  <span class="code-property">skills:</span>
-  <span class="code-bracket">[</span>
-  <span class="code-string">'HTML'</span>, 
-  <span class="code-string">'CSS'</span>, 
-  <span class="code-string">'PHP'</span>, 
-  <span class="code-string">'Java'</span>, 
-  <span class="code-string">'MySQL'</span>, 
-  <span class="code-string">'Basic Troubleshooting'</span>
-  <span class="code-bracket">]</span>,
-</div>
+                <div class="code-line">
+                  <span class="code-property">skills:</span>
+                  <span class="code-bracket">[</span>
+                  <span class="code-string">'HTML'</span>,
+                  <span class="code-string">'CSS'</span>,
+                  <span class="code-string">'PHP'</span>,
+                  <span class="code-string">'MySQL'</span>,
+                  <span class="code-string">'Java'</span>
+                  <span class="code-bracket">]</span>,
+                </div>
 
                 <div class="code-line">
   <span class="code-property">passion:</span>
@@ -141,7 +171,8 @@
           </div>
         </div>
       </div>
-      
+    </div>
+
       <div class="scroll-indicator" data-aos="fade-up" data-aos-delay="1500">
         <div class="scroll-mouse">
           <div class="scroll-wheel"></div>
@@ -152,21 +183,28 @@
 
     <!-- About Section -->
     <section class="about" id="about">
+      <div class="parallax-shape shape-1" data-speed="0.05" style="top: 10%; left: 5%; width: 200px; height: 200px; opacity: 0.05;"></div>
+      <div class="parallax-shape shape-3" data-speed="0.1" style="bottom: 10%; right: 5%; width: 150px; height: 150px; opacity: 0.05;"></div>
+
       <div class="container">
+
         <div class="section-header" data-aos="fade-up">
+          <span class="section-outline-text">ABOUT</span>
           <h2 class="section-title">About Me</h2>
           <p class="section-subtitle">Get to know more about who I am and what I do</p>
         </div>
         
         <div class="about-content">
-          <div class="about-image" data-aos="fade-right" data-aos-duration="1000">
+          <div class="about-image" data-aos="zoom-in-right" data-aos-duration="1200">
+
             <div class="image-container">
               <img src="prof.jpg" alt="Van Jasper Benzon" class="profile-image">
               <div class="image-overlay"></div>
             </div>
           </div>
           
-          <div class="about-text" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
+          <div class="about-text" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
+
   <h3>Aspiring Developer & Tech Enthusiast</h3>
   <p>
     I’m a recent IT graduate with a strong foundation in web development and a growing passion for clean, user-friendly design. 
@@ -208,17 +246,27 @@
 
     <!-- Projects Section -->
 <section class="projects" id="projects">
+  <div class="parallax-shape shape-2" data-speed="0.08" style="top: 20%; right: -50px; width: 300px; height: 300px; opacity: 0.03;"></div>
+
   <div class="container">
+
     <div class="section-header" data-aos="fade-up">
+      <span class="section-outline-text">WORKS</span>
       <h2 class="section-title">Featured Projects</h2>
       <p class="section-subtitle">Some of the projects I built during my academic journey</p>
     </div>
     
     <div class="projects-grid">
       <!-- Project 1 -->
-      <div class="project-card" data-aos="fade-up" data-aos-duration="800">
-        <div class="project-image">
-          <img src="st.webp" alt="Student Information System">
+      <div class="project-card" data-aos="zoom-in-up" data-aos-duration="1000">
+
+        <div class="project-image dual-mockup">
+          <div class="mockup-bg">
+            <img src="pension_grid.png" alt="PensionPOS Grid">
+          </div>
+          <div class="mockup-fg">
+            <img src="pension_login.png" alt="PensionPOS Login">
+          </div>
           <div class="project-overlay">
             <div class="project-links">
               <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
@@ -227,22 +275,29 @@
           </div>
         </div>
         <div class="project-content">
-          <h3 class="project-title">Student Information System</h3>
+          <h3 class="project-title">PensionPOS System</h3>
           <p class="project-description">
-            A PHP and MySQL-based system that allows admin users to manage student records including enrollment, grades, and profiles.
-          </p>
+            A full-stack hospitality management solution designed for high-turnover establishments. It features a real-time room status grid (Available, Occupied, Cleaning), a robust cash shift management system for staff accountability, and a dynamic billing engine that handles hourly extensions and automated tax calculations.          </p>
           <div class="project-tech">
             <span class="tech-tag">PHP</span>
             <span class="tech-tag">MySQL</span>
+            <span class="tech-tag">JavaScript</span>
             <span class="tech-tag">HTML/CSS</span>
+            <span class="tech-tag">REST API</span>
           </div>
         </div>
       </div>
 
       <!-- Project 2 -->
-      <div class="project-card" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
-        <div class="project-image">
-          <img src="pos.webp" alt="Simple POS System">
+      <div class="project-card" data-aos="zoom-in-up" data-aos-duration="1000" data-aos-delay="200">
+
+        <div class="project-image dual-mockup">
+          <div class="mockup-bg">
+            <img src="pos_terminal.png" alt="RetailPOS Terminal">
+          </div>
+          <div class="mockup-fg">
+            <img src="pos_login.png" alt="RetailPOS Login">
+          </div>
           <div class="project-overlay">
             <div class="project-links">
               <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
@@ -251,22 +306,44 @@
           </div>
         </div>
         <div class="project-content">
-          <h3 class="project-title">Simple POS System</h3>
+          <h3 class="project-title">RetailPOS System</h3>
           <p class="project-description">
-            A basic Point-of-Sale system for a small store, with product listing, cart management, and sales reporting functionality.
+            RetailPOS is a robust, web-based management solution tailored for modern retail operations. It combines a high-speed Point of Sale interface with deep back-office controls, designed specifically to handle the complexities of multi-location businesses.
+            Core Capabilities:
+            •
+            Granular Inventory Lifecycle: Manages the entire journey of stock, from Supplier Deliveries (with draft/confirm workflows and payment tracking) to Branch Transfers and final sales. Supports complex product variants with unique barcodes and pricing.
+            •
+            Financial & Expense Tracking: Goes beyond simple sales by integrating a dedicated Expenses module and GCash Transaction manager, allowing businesses to track cash flow from utilities, rent, and digital service fees in real-time.
+            •
+            Shift & Cashier Accountability: Features a strict Shift Management system that tracks starting balances, expected vs. actual sales, and automated cash-on-hand calculations to prevent discrepancies.
+            •
+            Operational Transparency: Includes a comprehensive Activity Log that records every sensitive action (saves, confirms, deletes) with a "before and after" snapshot for full auditability.
+            •
+            Localized for Growth: Built with native support for Philippine retail contexts (e.g., GCash integration, VAT/Fee handling) and a responsive, dark-themed UI for a professional desktop or tablet experience.
           </p>
           <div class="project-tech">
-            <span class="tech-tag">HTML</span>
             <span class="tech-tag">PHP</span>
             <span class="tech-tag">MySQL</span>
+            <span class="tech-tag">JavaScript</span>
+            <span class="tech-tag">Tailwind CSS</span>
+            <span class="tech-tag">Fetch API</span>
+            <span class="tech-tag">Bootstrap Icons</span>
+            <span class="tech-tag">CSS Grid & Flexbox</span>
+            <span class="tech-tag">Dark Mode</span>
           </div>
         </div>
       </div>
 
       <!-- Project 3 -->
-      <div class="project-card" data-aos="fade-up" data-aos-duration="800" data-aos-delay="400">
-        <div class="project-image">
-          <img src="java.png" alt="Java Calculator App">
+      <div class="project-card" data-aos="zoom-in-up" data-aos-duration="1000" data-aos-delay="400">
+
+        <div class="project-image dual-mockup">
+          <div class="mockup-bg">
+            <img src="profit_dash.png" alt="ProfitMonitor Dashboard">
+          </div>
+          <div class="mockup-fg">
+            <img src="profit_page.png" alt="ProfitMonitor Login">
+          </div>
           <div class="project-overlay">
             <div class="project-links">
               <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
@@ -275,13 +352,15 @@
           </div>
         </div>
         <div class="project-content">
-          <h3 class="project-title">Java Calculator App</h3>
+          <h3 class="project-title">ProfitMonitor System</h3>
           <p class="project-description">
-            A basic calculator desktop application developed in Java with GUI using Swing, capable of performing standard arithmetic operations.
-          </p>
+            A comprehensive inventory and sales management system designed for retail. Features a high-speed POS interface for receipt encoding, automated profit/margin calculation, and real-time inventory tracking with low-stock alerts. Includes a "Shift Closing" module to reconcile system sales with physical cash.          </p>
           <div class="project-tech">
-            <span class="tech-tag">Java</span>
-            <span class="tech-tag">Swing</span>
+            <span class="tech-tag">PHP</span>
+            <span class="tech-tag">MySQL</span>
+            <span class="tech-tag">JavaScript</span>
+            <span class="tech-tag">Chart.js</span>
+            <span class="tech-tag">Tailwind CSS</span>
           </div>
         </div>
       </div>
@@ -291,8 +370,12 @@
 
     <!-- Skills Section -->
 <section class="skills" id="skills">
+  <div class="parallax-shape shape-1" data-speed="0.1" style="top: -50px; left: 10%; width: 250px; height: 250px; opacity: 0.04;"></div>
+
   <div class="container">
+
     <div class="section-header" data-aos="fade-up">
+      <span class="section-outline-text">SKILLS</span>
       <h2 class="section-title">Skills & Expertise</h2>
       <p class="section-subtitle">Technologies and tools I’ve learned and worked with</p>
     </div>
@@ -421,6 +504,7 @@
     <section class="contact" id="contact">
     <div class="container">
   <div class="section-header" data-aos="fade-up">
+    <span class="section-outline-text">CONTACT</span>
     <h2 class="section-title">Let’s Work Together</h2>
     <p class="section-subtitle">I’m open to internships, freelance projects, or collaborations. Let’s build something great together!</p>
   </div>
@@ -468,9 +552,7 @@
             </div>
             
             <div class="social-links">
-              <a href="www.linkedin.com/in/
-van-jasper-benzon-626445278
-" class="social-link">
+              <a href="https://www.linkedin.com/in/van-jasper-benzon-626445278" class="social-link">
                 <i class="fab fa-linkedin-in"></i>
               </a>
               <a href="https://github.com/darkvj25/" class="social-link">
@@ -526,7 +608,7 @@ van-jasper-benzon-626445278
             Thanks for visiting my portfolio. Let's create something amazing together!
           </p>
           <div class="footer-social">
-            <a href="#" class="www.linkedin.com/in/van-jasper-benzon-626445278">
+            <a href="https://www.linkedin.com/in/van-jasper-benzon-626445278" class="social-link">
               <i class="fab fa-linkedin-in"></i>
             </a>
             <a href="https://github.com/darkvj25" class="social-link">
@@ -544,6 +626,26 @@ van-jasper-benzon-626445278
         </div>
       </div>
     </footer>
+
+    <!-- Image Lightbox Modal -->
+    <div id="lightbox-modal" class="lightbox-modal">
+      <span class="lightbox-close">&times;</span>
+      <button class="lightbox-nav lightbox-prev" aria-label="Previous Image">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button class="lightbox-nav lightbox-next" aria-label="Next Image">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      <div class="lightbox-content">
+        <img id="lightbox-img" src="" alt="Full View">
+      </div>
+      <div class="lightbox-info">
+        <h3 id="lightbox-title"></h3>
+        <div class="desc-container">
+          <p id="lightbox-desc"></p>
+        </div>
+      </div>
+    </div>
 
     <!-- AOS Animation Library -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
