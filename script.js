@@ -1,4 +1,728 @@
 
+class LiveWallpaper {
+  constructor({ reduceMotion = false } = {}) {
+    this.canvas = document.getElementById('live-wallpaper-canvas');
+    this.root = document.getElementById('live-wallpaper');
+    if (!this.canvas || !this.root) return;
+
+    this.ctx = this.canvas.getContext('2d');
+    this.reduceMotion = reduceMotion;
+    this.particles = [];
+    this.mouse = { x: null, y: null, active: false };
+    this.rafId = null;
+    this.themeObserver = null;
+
+    this.resize = this.resize.bind(this);
+    this.onPointerMove = this.onPointerMove.bind(this);
+    this.onPointerLeave = this.onPointerLeave.bind(this);
+    this.tick = this.tick.bind(this);
+
+    this.resize();
+    this.initParticles();
+    this.bindEvents();
+    this.applyTheme();
+    this.tick();
+  }
+
+  getTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  }
+
+  getPalette() {
+    const dark = this.getTheme() === 'dark';
+    return dark
+      ? {
+          particle: 'rgba(65, 242, 255, 0.85)',
+          particleDim: 'rgba(167, 139, 250, 0.55)',
+          line: 'rgba(65, 242, 255, 0.14)',
+          lineBright: 'rgba(167, 139, 250, 0.22)',
+          glow: 'rgba(65, 242, 255, 0.35)',
+          lineAlpha: 0.9,
+          glowBlur: 8,
+        }
+      : {
+          particle: 'rgba(79, 70, 229, 0.95)',
+          particleDim: 'rgba(124, 58, 237, 0.8)',
+          line: 'rgba(99, 102, 241, 0.22)',
+          lineBright: 'rgba(139, 92, 246, 0.32)',
+          glow: 'rgba(99, 102, 241, 0.45)',
+          lineAlpha: 0.95,
+          glowBlur: 10,
+        };
+  }
+
+  initParticles() {
+    const area = this.width * this.height;
+    const density = this.reduceMotion ? 0.00002 : 0.000055;
+    const count = Math.min(140, Math.max(35, Math.floor(area * density)));
+
+    this.particles = Array.from({ length: count }, () => this.createParticle(true));
+  }
+
+  createParticle(randomPos = false) {
+    return {
+      x: randomPos ? Math.random() * this.width : Math.random() * this.width,
+      y: randomPos ? Math.random() * this.height : Math.random() * this.height,
+      vx: (Math.random() - 0.5) * (this.reduceMotion ? 0.15 : 0.45),
+      vy: (Math.random() - 0.5) * (this.reduceMotion ? 0.15 : 0.45),
+      radius: Math.random() * 1.6 + 0.8,
+      pulse: Math.random() * Math.PI * 2,
+      hue: Math.random() > 0.5 ? 'cyan' : 'violet',
+    };
+  }
+
+  resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+    this.canvas.width = Math.floor(this.width * dpr);
+    this.canvas.height = Math.floor(this.height * dpr);
+    this.canvas.style.width = `${this.width}px`;
+    this.canvas.style.height = `${this.height}px`;
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (this.particles.length) this.initParticles();
+  }
+
+  bindEvents() {
+    window.addEventListener('resize', this.resize);
+    window.addEventListener('pointermove', this.onPointerMove, { passive: true });
+    window.addEventListener('pointerleave', this.onPointerLeave);
+
+    this.themeObserver = new MutationObserver(() => this.applyTheme());
+    this.themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+  }
+
+  applyTheme() {
+    this.root.dataset.theme = this.getTheme();
+  }
+
+  onPointerMove(e) {
+    this.mouse.x = e.clientX;
+    this.mouse.y = e.clientY;
+    this.mouse.active = true;
+  }
+
+  onPointerLeave() {
+    this.mouse.active = false;
+    this.mouse.x = null;
+    this.mouse.y = null;
+  }
+
+  tick() {
+    this.draw();
+    if (!this.reduceMotion) {
+      this.rafId = requestAnimationFrame(this.tick);
+    }
+  }
+
+  draw() {
+    const { ctx, width, height } = this;
+    const palette = this.getPalette();
+
+    ctx.clearRect(0, 0, width, height);
+
+    const linkDist = width < 768 ? 100 : 140;
+    const mouseRadius = 160;
+
+    for (const p of this.particles) {
+      if (!this.reduceMotion) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.pulse += 0.02;
+
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+
+        if (this.mouse.active && this.mouse.x != null) {
+          const dx = this.mouse.x - p.x;
+          const dy = this.mouse.y - p.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < mouseRadius && dist > 0) {
+            const force = (mouseRadius - dist) / mouseRadius;
+            p.x -= (dx / dist) * force * 1.8;
+            p.y -= (dy / dist) * force * 1.8;
+          }
+        }
+      }
+
+      for (const other of this.particles) {
+        if (other === p) continue;
+        const dx = p.x - other.x;
+        const dy = p.y - other.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < linkDist) {
+          const alpha = 1 - dist / linkDist;
+          ctx.beginPath();
+          ctx.strokeStyle = alpha > 0.6 ? palette.lineBright : palette.line;
+          ctx.globalAlpha = alpha * palette.lineAlpha;
+          ctx.lineWidth = alpha > 0.75 ? (this.getTheme() === 'dark' ? 1 : 1.1) : 0.7;
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(other.x, other.y);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+
+    for (const p of this.particles) {
+      const glow = Math.sin(p.pulse) * 0.5 + 0.5;
+      ctx.beginPath();
+      ctx.fillStyle = p.hue === 'cyan' ? palette.particle : palette.particleDim;
+      ctx.shadowColor = palette.glow;
+      ctx.shadowBlur = this.reduceMotion ? 0 : 4 + glow * palette.glowBlur;
+      ctx.arc(p.x, p.y, p.radius + glow * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  destroy() {
+    if (this.rafId) cancelAnimationFrame(this.rafId);
+    window.removeEventListener('resize', this.resize);
+    window.removeEventListener('pointermove', this.onPointerMove);
+    window.removeEventListener('pointerleave', this.onPointerLeave);
+    this.themeObserver?.disconnect();
+  }
+}
+
+class IntroLoader {
+  constructor({ reduceMotion = false } = {}) {
+    this.reduceMotion = reduceMotion;
+    this.loader = document.getElementById('loader');
+    this.bar = document.getElementById('loader-bar');
+    this.glitchBar = document.getElementById('loader-glitch-bar');
+    this.statusEl = document.getElementById('loader-status');
+    this.percentageEl = document.getElementById('loader-percentage');
+    this.modulesEl = document.getElementById('loader-modules');
+    this.parallaxEl = document.getElementById('loader-parallax');
+    this.loaderBg = document.getElementById('loader-bg');
+    this.scanSweep = document.querySelector('.loader-scan-sweep');
+    this.barContainer = document.querySelector('.loader-bar-container');
+    this.accessGranted = document.getElementById('loader-access-granted');
+    this.particlesCanvas = document.getElementById('loader-particles');
+    this.hero = document.querySelector('[data-intro-hero]');
+    this.audioGate = document.getElementById('loader-audio-gate');
+
+    this.soundEnabled = true;
+    this.introStarted = false;
+    this.audioUnlocked = false;
+    this.soundQueue = [];
+    this.audioCtx = null;
+    this.matrixMode = false;
+    this.typeTimer = null;
+    this.scrambleTimer = null;
+    this.progress = 0;
+    this.displayProgress = 0;
+    this.milestonesHit = new Set();
+    this.verifying = false;
+    this.finished = false;
+    this.particleRaf = null;
+    this.particles = [];
+
+    this.statuses = [
+      'INITIALIZING SYSTEM...',
+      'LOADING ASSETS...',
+      'COMPILING SCRIPTS...',
+      'READYING PORTFOLIO...',
+      'OPTIMIZING INTERFACE...',
+      'SYSTEM READY'
+    ];
+
+    this.modules = [
+      { name: 'core.styles', at: 6 },
+      { name: 'hero.layout', at: 14 },
+      { name: 'workspace.png', at: 22 },
+      { name: 'prof.jpg', at: 30 },
+      { name: 'projects.grid', at: 42 },
+      { name: 'skills.data', at: 54 },
+      { name: 'contact.form', at: 66 },
+      { name: 'animations.lib', at: 78 },
+      { name: 'interface.hud', at: 88 },
+    ];
+
+    this.preloadUrls = [
+      'workspace.png',
+      'prof.jpg',
+      'pension_grid.png',
+      'pension_login.png',
+    ];
+
+    this.konami = [];
+    this.konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  }
+
+  start() {
+    if (!this.loader) return;
+
+    document.body.classList.add('is-intro-loading');
+    this.setupAudioGate();
+    this.setupEasterEggs();
+
+    if (!this.reduceMotion) {
+      this.initParticles();
+      this.setupParallax();
+    }
+
+    this.typeStatus(this.statuses[0]);
+    this.playZoom('boot');
+
+    if (navigator.userActivation?.isActive) {
+      this.enableAudio();
+    }
+
+    if (this.reduceMotion) {
+      this.runReducedMotion();
+      return;
+    }
+
+    this.runFullIntro();
+  }
+
+  setupAudioGate() {
+    const enable = () => this.enableAudio();
+
+    this.audioGate?.addEventListener('click', (e) => {
+      e.preventDefault();
+      enable();
+    });
+
+    this.audioGate?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') enable();
+    });
+  }
+
+  async enableAudio() {
+    if (this.introStarted) return;
+    this.introStarted = true;
+
+    this.audioGate?.classList.add('is-dismissed');
+    await this.unlockAudio();
+  }
+
+  async unlockAudio() {
+    if (this.audioUnlocked) return;
+    try {
+      if (!this.audioCtx) {
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (this.audioCtx.state === 'suspended') {
+        await this.audioCtx.resume();
+      }
+      const t = this.audioCtx.currentTime;
+      const osc = this.audioCtx.createOscillator();
+      const g = this.audioCtx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      osc.connect(g);
+      g.connect(this.audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 0.02);
+      this.audioUnlocked = this.audioCtx.state === 'running';
+      if (this.audioUnlocked) {
+        const queue = [...this.soundQueue];
+        this.soundQueue = [];
+        queue.forEach((type) => this.playZoom(type, true));
+      }
+    } catch {
+      /* blocked until gesture */
+    }
+  }
+
+  getAudioCtx() {
+    if (!this.soundEnabled) return null;
+    if (!this.audioCtx) {
+      this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return this.audioCtx;
+  }
+
+  playZoom(type, fromQueue = false) {
+    if (!this.soundEnabled) return;
+
+    if (!this.audioUnlocked) {
+      if (!fromQueue) this.soundQueue.push(type);
+      return;
+    }
+
+    const ctx = this.getAudioCtx();
+    if (!ctx || ctx.state !== 'running') return;
+
+    const now = ctx.currentTime;
+    const presets = {
+      boot: { duration: 0.55, gain: 0.22, startFreq: 120, endFreq: 2200, curve: 'in' },
+      tick: { duration: 0.28, gain: 0.14, startFreq: 280, endFreq: 1400, curve: 'in' },
+      milestone: { duration: 0.38, gain: 0.18, startFreq: 200, endFreq: 2800, curve: 'in' },
+      verify: { duration: 0.5, gain: 0.16, startFreq: 400, endFreq: 3200, curve: 'in' },
+      crack: { duration: 0.45, gain: 0.24, startFreq: 1800, endFreq: 80, curve: 'out' },
+      exit: { duration: 1.05, gain: 0.32, startFreq: 2400, endFreq: 60, curve: 'out' },
+    };
+    const p = presets[type] || presets.tick;
+    const duration = p.duration;
+
+    const bufferSize = Math.ceil(ctx.sampleRate * duration);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      const t = i / bufferSize;
+      const env = Math.sin(Math.PI * t) * (1 - t * 0.15);
+      data[i] = (Math.random() * 2 - 1) * env;
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.Q.value = 1.2;
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(p.gain, now + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    if (p.curve === 'in') {
+      filter.frequency.setValueAtTime(p.startFreq, now);
+      filter.frequency.exponentialRampToValueAtTime(Math.max(p.endFreq, 40), now + duration * 0.92);
+    } else {
+      filter.frequency.setValueAtTime(p.startFreq, now);
+      filter.frequency.exponentialRampToValueAtTime(Math.max(p.endFreq, 40), now + duration);
+    }
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    noise.start(now);
+    noise.stop(now + duration + 0.05);
+  }
+
+  setupEasterEggs() {
+    document.addEventListener('keydown', (e) => {
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      this.konami.push(key);
+      if (this.konami.length > this.konamiCode.length) this.konami.shift();
+      if (this.konami.join(',') === this.konamiCode.join(',')) {
+        this.matrixMode = true;
+        this.loader?.classList.add('loader--matrix');
+        const mem = document.getElementById('loader-hud-mem');
+        if (mem) mem.textContent = 'MODE: MATRIX';
+        this.typeStatus('BREACH PROTOCOL ACTIVE...');
+      }
+    });
+
+    let rapidKeys = 0;
+    let rapidTimer;
+    document.addEventListener('keydown', () => {
+      if (this.finished) return;
+      rapidKeys += 1;
+      clearTimeout(rapidTimer);
+      rapidTimer = setTimeout(() => { rapidKeys = 0; }, 400);
+      if (rapidKeys >= 6) {
+        rapidKeys = 0;
+        this.triggerScanSweep();
+        this.playZoom('milestone');
+      }
+    });
+  }
+
+  setupParallax() {
+    this.loader?.addEventListener('pointermove', (e) => {
+      if (!this.parallaxEl) return;
+      const rect = this.loader.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      this.parallaxEl.style.transform = `translate(${x * 14}px, ${y * 10}px)`;
+    });
+    this.loader?.addEventListener('pointerleave', () => {
+      if (this.parallaxEl) this.parallaxEl.style.transform = '';
+    });
+  }
+
+  initParticles() {
+    if (!this.particlesCanvas) return;
+    const ctx = this.particlesCanvas.getContext('2d');
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      this.particlesCanvas.width = window.innerWidth * dpr;
+      this.particlesCanvas.height = window.innerHeight * dpr;
+      this.particlesCanvas.style.width = `${window.innerWidth}px`;
+      this.particlesCanvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      this.pw = window.innerWidth;
+      this.ph = window.innerHeight;
+      if (!this.particles.length) {
+        const n = 40;
+        this.particles = Array.from({ length: n }, () => ({
+          x: Math.random() * this.pw,
+          y: Math.random() * this.ph,
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: (Math.random() - 0.5) * 0.35,
+          r: Math.random() * 1.5 + 0.5,
+          a: Math.random() * 0.5 + 0.2,
+        }));
+      }
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const matrixCols = [];
+    const initMatrix = () => {
+      matrixCols.length = 0;
+      const step = 18;
+      for (let x = 0; x < this.pw; x += step) {
+        matrixCols.push({ x, y: Math.random() * this.ph, speed: 2 + Math.random() * 4 });
+      }
+    };
+
+    const tick = () => {
+      if (this.finished || !this.loader || this.loader.classList.contains('loaded')) {
+        return;
+      }
+      ctx.clearRect(0, 0, this.pw, this.ph);
+
+      if (this.matrixMode) {
+        if (!matrixCols.length) initMatrix();
+        ctx.font = '12px monospace';
+        matrixCols.forEach((col) => {
+          col.y += col.speed;
+          if (col.y > this.ph) col.y = -20;
+          const ch = String.fromCharCode(0x30a0 + Math.random() * 96);
+          ctx.fillStyle = `rgba(0,255,100,${0.15 + Math.random() * 0.35})`;
+          ctx.fillText(ch, col.x, col.y);
+        });
+      } else {
+        const color = 'rgba(99,102,241,';
+        this.particles.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0) p.x = this.pw;
+          if (p.x > this.pw) p.x = 0;
+          if (p.y < 0) p.y = this.ph;
+          if (p.y > this.ph) p.y = 0;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `${color}${p.a})`;
+          ctx.fill();
+        });
+      }
+
+      this.particleRaf = requestAnimationFrame(tick);
+    };
+    tick();
+  }
+
+  typeStatus(text) {
+    if (!this.statusEl) return;
+    clearTimeout(this.typeTimer);
+    this.statusEl.textContent = '';
+    let i = 0;
+    const type = () => {
+      if (i <= text.length) {
+        this.statusEl.textContent = text.slice(0, i);
+        i += 1;
+        this.typeTimer = setTimeout(type, 28);
+      }
+    };
+    type();
+  }
+
+  scrambleTo(target) {
+    if (!this.percentageEl) return;
+    clearInterval(this.scrambleTimer);
+    this.percentageEl.classList.add('is-scrambling');
+    const chars = '0123456789%';
+    let frames = 0;
+    this.scrambleTimer = setInterval(() => {
+      frames += 1;
+      if (frames > 6) {
+        clearInterval(this.scrambleTimer);
+        this.percentageEl.textContent = `${target}%`;
+        this.percentageEl.classList.remove('is-scrambling');
+        return;
+      }
+      let s = '';
+      for (let j = 0; j < 3; j++) s += chars[Math.floor(Math.random() * chars.length)];
+      this.percentageEl.textContent = s;
+    }, 40);
+  }
+
+  triggerScanSweep() {
+    if (!this.scanSweep) return;
+    this.scanSweep.classList.remove('is-sweeping');
+    void this.scanSweep.offsetWidth;
+    this.scanSweep.classList.add('is-sweeping');
+    setTimeout(() => this.scanSweep?.classList.remove('is-sweeping'), 1200);
+  }
+
+  updateModules(progress) {
+    if (!this.modulesEl) return;
+    this.modules.forEach((mod) => {
+      const existing = this.modulesEl.querySelector(`[data-module="${mod.name}"]`);
+      if (progress >= mod.at && !existing) {
+        const li = document.createElement('li');
+        li.dataset.module = mod.name;
+        li.className = 'is-load';
+        li.textContent = `${mod.name} …`;
+        this.modulesEl.appendChild(li);
+        if (this.modulesEl.children.length > 4) {
+          this.modulesEl.removeChild(this.modulesEl.firstChild);
+        }
+      }
+      if (progress >= mod.at + 8 && existing && existing.classList.contains('is-load')) {
+        existing.className = 'is-ok';
+        existing.textContent = `${mod.name} … OK`;
+      }
+    });
+  }
+
+  setProgress(value) {
+    const next = Math.floor(value);
+    if (this.loaderBg) {
+      this.loaderBg.style.setProperty('--loader-grid-opacity', (value / 100).toFixed(2));
+    }
+    if (this.loader) {
+      this.loader.style.setProperty('--loader-chroma', (value / 100).toFixed(2));
+    }
+    if (this.bar) this.bar.style.width = `${value}%`;
+    if (this.glitchBar) {
+      this.glitchBar.style.width = `${value}%`;
+      this.glitchBar.classList.toggle('is-active', value > 5 && value < 100);
+    }
+    if (next !== this.displayProgress) {
+      this.displayProgress = next;
+      this.scrambleTo(next);
+    }
+
+    [25, 50, 75].forEach((m) => {
+      if (value >= m && !this.milestonesHit.has(m)) {
+        this.milestonesHit.add(m);
+        this.barContainer?.classList.add('milestone-pop');
+        setTimeout(() => this.barContainer?.classList.remove('milestone-pop'), 400);
+        this.triggerScanSweep();
+        this.playZoom('milestone');
+      }
+    });
+
+    const statusIndex = Math.min(
+      this.statuses.length - 1,
+      Math.floor((value / 100) * (this.statuses.length - 1))
+    );
+    const nextStatus = this.matrixMode && value > 80
+      ? 'MATRIX LINK ESTABLISHED...'
+      : this.statuses[statusIndex];
+    if (this.statusEl && this.statusEl.textContent !== nextStatus && !this.verifying) {
+      this.typeStatus(nextStatus);
+    }
+
+    this.updateModules(value);
+
+  }
+
+  preloadAssets() {
+    const fontReady = document.fonts?.ready ?? Promise.resolve();
+    const images = this.preloadUrls.map(
+      (src) =>
+        new Promise((resolve) => {
+          const img = new Image();
+          img.onload = img.onerror = () => resolve(src);
+          img.src = src;
+        })
+    );
+    return Promise.all([fontReady, ...images]);
+  }
+
+  runReducedMotion() {
+    this.preloadAssets().then(() => {
+      this.setProgress(100);
+      if (this.statusEl) this.statusEl.textContent = this.statuses[this.statuses.length - 1];
+      this.playZoom('exit');
+      setTimeout(() => this.dismissLoader(false), 280);
+    });
+  }
+
+  async runFullIntro() {
+    let assetPct = 0;
+    const assetPromise = this.preloadAssets();
+
+    const assetRamp = setInterval(() => {
+      if (assetPct < 68) assetPct = Math.min(68, assetPct + 1.8);
+      this.progress = assetPct;
+      if (!this.verifying && !this.finished) this.setProgress(assetPct);
+    }, 60);
+
+    await assetPromise;
+    clearInterval(assetRamp);
+    assetPct = 68;
+    this.progress = 68;
+    this.setProgress(68);
+
+    const mainLoop = setInterval(() => {
+      if (this.finished || this.verifying) return;
+
+      this.progress = Math.min(97, this.progress + 0.6 + Math.random() * 1.4);
+      this.setProgress(this.progress);
+
+      if (this.progress >= 97) {
+        clearInterval(mainLoop);
+        this.verifying = true;
+        this.typeStatus('VERIFYING INTEGRITY...');
+        this.playZoom('verify');
+
+        setTimeout(() => {
+          this.progress = 100;
+          this.setProgress(100);
+          this.typeStatus(this.statuses[this.statuses.length - 1]);
+          setTimeout(() => this.playCrackSequence(), 450);
+        }, 900);
+      }
+    }, 55);
+  }
+
+  playCrackSequence() {
+    if (this.finished) return;
+    this.finished = true;
+    if (this.particleRaf) cancelAnimationFrame(this.particleRaf);
+
+    this.typeStatus('SYSTEM BREACH');
+    this.playZoom('crack');
+
+    this.loader?.classList.add('crack-heal');
+    setTimeout(() => {
+      this.loader?.classList.remove('crack-heal');
+      this.loader?.classList.add('cracking');
+      this.accessGranted?.classList.add('is-visible');
+
+      setTimeout(() => {
+        this.playZoom('exit');
+        this.loader?.classList.add('zoom-through');
+        this.hero?.classList.add('hero--intro-reveal');
+        document.body.classList.add('intro-hud-handoff');
+        setTimeout(() => document.body.classList.remove('intro-hud-handoff'), 1200);
+      }, 750);
+
+      setTimeout(() => this.dismissLoader(true), 1650);
+    }, 220);
+  }
+
+  dismissLoader(animated) {
+    document.body.classList.remove('is-intro-loading');
+    this.loader?.classList.remove('cracking', 'crack-heal', 'zoom-through');
+    this.loader?.classList.add('loaded');
+    this.accessGranted?.classList.remove('is-visible');
+    clearInterval(this.scrambleTimer);
+    clearTimeout(this.typeTimer);
+
+    setTimeout(() => {
+      if (typeof AOS !== 'undefined') AOS.refresh();
+    }, 600);
+
+    setTimeout(() => {
+      this.hero?.classList.remove('hero--intro-reveal');
+    }, animated ? 2000 : 0);
+  }
+
+}
 
 class PortfolioApp {
   constructor() {
@@ -32,6 +756,7 @@ class PortfolioApp {
     this.setupCustomCursor();
     this.setupLightbox();
     this.setupNavReticle();
+    this.setupLiveWallpaper();
   }
 
   setupReducedMotion() {
@@ -44,61 +769,8 @@ class PortfolioApp {
   }
 
   setupPageEntrance() {
-    const loader = document.getElementById('loader');
-    const loaderBar = document.querySelector('.loader-bar');
-    const loaderStatus = document.querySelector('.loader-status');
-    const loaderPercentage = document.querySelector('.loader-percentage');
-
-    const statuses = [
-      'INITIALIZING SYSTEM...',
-      'LOADING ASSETS...',
-      'COMPILING SCRIPTS...',
-      'READYING PORTFOLIO...',
-      'OPTIMIZING INTERFACE...',
-      'SYSTEM READY'
-    ];
-
-    // Reduced motion: keep boot short + no jittery loops
-    if (this.reduceMotion) {
-      if (loaderBar) loaderBar.style.width = `100%`;
-      if (loaderPercentage) loaderPercentage.textContent = `100%`;
-      if (loaderStatus) loaderStatus.textContent = statuses[statuses.length - 1];
-      setTimeout(() => {
-        loader?.classList.add('loaded');
-      }, 250);
-      return;
-    }
-
-    // Simulate loading progress
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 5;
-      if (progress > 100) progress = 100;
-
-      const currentProgress = Math.floor(progress);
-
-      if (loaderBar) loaderBar.style.width = `${currentProgress}%`;
-      if (loaderPercentage) loaderPercentage.textContent = `${currentProgress}%`;
-
-      // Update status text based on progress
-      if (loaderStatus) {
-        const statusIndex = Math.floor((currentProgress / 100) * (statuses.length - 1));
-        if (loaderStatus.textContent !== statuses[statusIndex]) {
-          loaderStatus.textContent = statuses[statusIndex];
-        }
-      }
-
-      if (progress >= 100) {
-        clearInterval(interval);
-        setTimeout(() => {
-          loader?.classList.add('loaded');
-          // Trigger AOS refresh after loader is gone
-          setTimeout(() => {
-            if (typeof AOS !== 'undefined') AOS.refresh();
-          }, 600);
-        }, 500);
-      }
-    }, 50);
+    this.introLoader = new IntroLoader({ reduceMotion: this.reduceMotion });
+    this.introLoader.start();
   }
 
   setupEventListeners() {
@@ -848,6 +1520,10 @@ class PortfolioApp {
     // watch active class changes (IntersectionObserver updates it)
     const mo = new MutationObserver(sync);
     mo.observe(menu, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  }
+
+  setupLiveWallpaper() {
+    this.liveWallpaper = new LiveWallpaper({ reduceMotion: this.reduceMotion });
   }
 
   handleKeydown(e) {

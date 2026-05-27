@@ -27,20 +27,83 @@
   </head>
 
   <body>
+    <!-- Gaming-style live wallpaper -->
+    <div class="live-wallpaper" id="live-wallpaper" aria-hidden="true">
+      <div class="live-wallpaper__orbs">
+        <span class="live-wallpaper__orb live-wallpaper__orb--1"></span>
+        <span class="live-wallpaper__orb live-wallpaper__orb--2"></span>
+        <span class="live-wallpaper__orb live-wallpaper__orb--3"></span>
+      </div>
+      <canvas class="live-wallpaper__canvas" id="live-wallpaper-canvas"></canvas>
+      <div class="live-wallpaper__grid"></div>
+      <div class="live-wallpaper__vignette"></div>
+    </div>
+
     <!-- Page Loader / Entrance Animation -->
     <div class="loader" id="loader">
-      <div class="loader-bg"></div>
-      <div class="loader-content">
-        <div class="loader-logo">
+      <div class="loader-bg" id="loader-bg"></div>
+      <canvas class="loader-particles" id="loader-particles" aria-hidden="true"></canvas>
+      <div class="loader-scan-sweep" aria-hidden="true"></div>
+
+      <div class="loader-hud" aria-hidden="true">
+        <span class="loader-hud__corner loader-hud__corner--tl"></span>
+        <span class="loader-hud__corner loader-hud__corner--tr"></span>
+        <span class="loader-hud__corner loader-hud__corner--bl"></span>
+        <span class="loader-hud__corner loader-hud__corner--br"></span>
+        <span class="loader-hud__label loader-hud__label--tl">BOOT_SEQ</span>
+        <span class="loader-hud__label loader-hud__label--tr" id="loader-hud-mem">MEM: OK</span>
+        <span class="loader-hud__label loader-hud__label--bl">NET: SYNC</span>
+        <span class="loader-hud__label loader-hud__label--br">UID: V-J</span>
+        <div class="loader-hud__crosshair"></div>
+      </div>
+
+      <div class="loader-crack" aria-hidden="true">
+        <div class="crack-static"></div>
+        <div class="crack-rgb-burst"></div>
+        <div class="crack-impact-ring"></div>
+        <div class="crack-flash"></div>
+        <svg class="crack-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path class="crack-line" d="M50 50 L51 44 L49 36 L52 24 L48 10 L50 0" />
+          <path class="crack-line" d="M50 50 L54 48 L62 49 L74 46 L88 42 L100 44" />
+          <path class="crack-line" d="M50 50 L48 54 L49 64 L47 76 L50 88 L50 100" />
+          <path class="crack-line" d="M50 50 L46 52 L38 50 L26 52 L12 48 L0 50" />
+          <path class="crack-line" d="M50 50 L55 46 L60 40 L68 32 L76 22 L82 12" />
+          <path class="crack-line" d="M50 50 L45 55 L40 62 L32 72 L24 82 L18 92" />
+          <path class="crack-line" d="M50 50 L56 54 L64 60 L72 70 L78 80" />
+          <path class="crack-line" d="M50 50 L44 46 L36 40 L28 30 L22 20" />
+          <path class="crack-line crack-line--thin" d="M50 50 L52 52 L54 58 L53 65" />
+          <path class="crack-line crack-line--thin" d="M50 50 L48 48 L44 44 L40 40" />
+          <path class="crack-line crack-line--thin" d="M50 50 L56 50 L60 54 L58 60" />
+          <path class="crack-line crack-line--thin" d="M50 50 L46 54 L42 58 L38 64" />
+        </svg>
+        <div class="crack-shard crack-shard--tl"></div>
+        <div class="crack-shard crack-shard--tr"></div>
+        <div class="crack-shard crack-shard--bl"></div>
+        <div class="crack-shard crack-shard--br"></div>
+        <div class="crack-shard crack-shard--center"></div>
+      </div>
+
+      <div class="loader-iris" id="loader-iris" aria-hidden="true"></div>
+      <div class="loader-access-granted" id="loader-access-granted" aria-hidden="true">ACCESS GRANTED</div>
+
+      <div class="loader-content" id="loader-parallax">
+        <div class="loader-logo loader-logo--enter">
           <span class="logo-text" data-text="V-J">V-J</span>
         </div>
-        <div class="loader-status">INITIALIZING SYSTEM...</div>
-        <div class="loader-bar-container">
-          <div class="loader-bar"></div>
-          <div class="loader-glitch"></div>
+        <div class="loader-status-line">
+          <span class="loader-status" id="loader-status"></span><span class="loader-cursor" aria-hidden="true">_</span>
         </div>
-        <div class="loader-percentage">0%</div>
+        <ul class="loader-modules" id="loader-modules" aria-hidden="true"></ul>
+        <div class="loader-bar-container">
+          <div class="loader-bar" id="loader-bar"></div>
+          <div class="loader-glitch" id="loader-glitch-bar"></div>
+        </div>
+        <div class="loader-percentage" id="loader-percentage">0%</div>
       </div>
+
+      <button type="button" class="loader-audio-gate" id="loader-audio-gate" aria-label="Start intro">
+        <span class="loader-audio-gate__hint">CLICK OR TAP FOR SOUND</span>
+      </button>
     </div>
 
     <!-- Custom Cursor Elements -->
@@ -99,7 +162,7 @@
     </div>
 
     <!-- Hero Section -->
-    <section class="hero" id="home">
+    <section class="hero" id="home" data-intro-hero>
       <!-- Parallax Background Image -->
       <div class="hero-image-bg parallax-shape" data-speed="0.1">
         <img src="workspace.png" alt="Developer Workspace">
