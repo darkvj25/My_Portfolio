@@ -21,6 +21,14 @@ class LiveWallpaper {
     this.initParticles();
     this.bindEvents();
     this.applyTheme();
+    // Delay start if loader is present
+    if (!document.body.classList.contains('is-intro-loading')) {
+      this.tick();
+    }
+  }
+
+  start() {
+    if (this.rafId) return;
     this.tick();
   }
 
@@ -52,27 +60,30 @@ class LiveWallpaper {
   }
 
   initParticles() {
+    const isMobile = window.innerWidth < 768;
     const area = this.width * this.height;
-    const density = this.reduceMotion ? 0.00002 : 0.000055;
-    const count = Math.min(140, Math.max(35, Math.floor(area * density)));
+    const density = this.reduceMotion ? 0.000015 : (isMobile ? 0.00003 : 0.000055);
+    const count = Math.min(isMobile ? 60 : 140, Math.max(isMobile ? 20 : 35, Math.floor(area * density)));
 
     this.particles = Array.from({ length: count }, () => this.createParticle(true));
   }
 
   createParticle(randomPos = false) {
+    const isMobile = window.innerWidth < 768;
     return {
       x: randomPos ? Math.random() * this.width : Math.random() * this.width,
       y: randomPos ? Math.random() * this.height : Math.random() * this.height,
-      vx: (Math.random() - 0.5) * (this.reduceMotion ? 0.15 : 0.45),
-      vy: (Math.random() - 0.5) * (this.reduceMotion ? 0.15 : 0.45),
-      radius: Math.random() * 1.6 + 0.8,
+      vx: (Math.random() - 0.5) * (this.reduceMotion ? 0.1 : (isMobile ? 0.25 : 0.45)),
+      vy: (Math.random() - 0.5) * (this.reduceMotion ? 0.1 : (isMobile ? 0.25 : 0.45)),
+      radius: isMobile ? (Math.random() * 1.2 + 0.6) : (Math.random() * 1.6 + 0.8),
       pulse: Math.random() * Math.PI * 2,
       hue: Math.random() > 0.5 ? 'cyan' : 'violet',
     };
   }
 
   resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const isMobile = window.innerWidth < 768;
+    const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.canvas.width = Math.floor(this.width * dpr);
@@ -121,13 +132,17 @@ class LiveWallpaper {
   draw() {
     const { ctx, width, height } = this;
     const palette = this.getPalette();
+    const isMobile = width < 768;
 
     ctx.clearRect(0, 0, width, height);
 
-    const linkDist = width < 768 ? 100 : 140;
-    const mouseRadius = 160;
+    const linkDist = isMobile ? 80 : 140;
+    const mouseRadius = isMobile ? 100 : 160;
 
-    for (const p of this.particles) {
+    // Optimization: Draw lines first to avoid changing globalAlpha too often
+    ctx.lineWidth = 0.7;
+    for (let i = 0; i < this.particles.length; i++) {
+      const p = this.particles[i];
       if (!this.reduceMotion) {
         p.x += p.vx;
         p.y += p.vy;
@@ -139,43 +154,56 @@ class LiveWallpaper {
         if (this.mouse.active && this.mouse.x != null) {
           const dx = this.mouse.x - p.x;
           const dy = this.mouse.y - p.y;
-          const dist = Math.hypot(dx, dy);
-          if (dist < mouseRadius && dist > 0) {
-            const force = (mouseRadius - dist) / mouseRadius;
-            p.x -= (dx / dist) * force * 1.8;
-            p.y -= (dy / dist) * force * 1.8;
+          const dist = dx * dx + dy * dy; // Use squared distance for optimization
+          const rSq = mouseRadius * mouseRadius;
+          if (dist < rSq && dist > 0) {
+            const d = Math.sqrt(dist);
+            const force = (mouseRadius - d) / mouseRadius;
+            p.x -= (dx / d) * force * 1.8;
+            p.y -= (dy / d) * force * 1.8;
           }
         }
       }
 
-      for (const other of this.particles) {
-        if (other === p) continue;
+      // $O(N^2)$ but optimized distance check
+      for (let j = i + 1; j < this.particles.length; j++) {
+        const other = this.particles[j];
         const dx = p.x - other.x;
         const dy = p.y - other.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < linkDist) {
+        const distSq = dx * dx + dy * dy;
+        const linkDistSq = linkDist * linkDist;
+
+        if (distSq < linkDistSq) {
+          const dist = Math.sqrt(distSq);
           const alpha = 1 - dist / linkDist;
           ctx.beginPath();
           ctx.strokeStyle = alpha > 0.6 ? palette.lineBright : palette.line;
           ctx.globalAlpha = alpha * palette.lineAlpha;
-          ctx.lineWidth = alpha > 0.75 ? (this.getTheme() === 'dark' ? 1 : 1.1) : 0.7;
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(other.x, other.y);
           ctx.stroke();
-          ctx.globalAlpha = 1;
         }
       }
     }
+    ctx.globalAlpha = 1;
 
     for (const p of this.particles) {
       const glow = Math.sin(p.pulse) * 0.5 + 0.5;
       ctx.beginPath();
       ctx.fillStyle = p.hue === 'cyan' ? palette.particle : palette.particleDim;
-      ctx.shadowColor = palette.glow;
-      ctx.shadowBlur = this.reduceMotion ? 0 : 4 + glow * palette.glowBlur;
+
+      // ShadowBlur is very expensive on mobile
+      if (!isMobile) {
+        ctx.shadowColor = palette.glow;
+        ctx.shadowBlur = this.reduceMotion ? 0 : 4 + glow * palette.glowBlur;
+      }
+
       ctx.arc(p.x, p.y, p.radius + glow * 0.4, 0, Math.PI * 2);
       ctx.fill();
-      ctx.shadowBlur = 0;
+
+      if (!isMobile) {
+        ctx.shadowBlur = 0;
+      }
     }
   }
 
@@ -442,8 +470,10 @@ class IntroLoader {
   initParticles() {
     if (!this.particlesCanvas) return;
     const ctx = this.particlesCanvas.getContext('2d');
+    const isMobile = window.innerWidth < 768;
+
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
       this.particlesCanvas.width = window.innerWidth * dpr;
       this.particlesCanvas.height = window.innerHeight * dpr;
       this.particlesCanvas.style.width = `${window.innerWidth}px`;
@@ -452,13 +482,13 @@ class IntroLoader {
       this.pw = window.innerWidth;
       this.ph = window.innerHeight;
       if (!this.particles.length) {
-        const n = 40;
+        const n = isMobile ? 25 : 40;
         this.particles = Array.from({ length: n }, () => ({
           x: Math.random() * this.pw,
           y: Math.random() * this.ph,
-          vx: (Math.random() - 0.5) * 0.35,
-          vy: (Math.random() - 0.5) * 0.35,
-          r: Math.random() * 1.5 + 0.5,
+          vx: (Math.random() - 0.5) * (isMobile ? 0.25 : 0.35),
+          vy: (Math.random() - 0.5) * (isMobile ? 0.25 : 0.35),
+          r: Math.random() * (isMobile ? 1.2 : 1.5) + 0.5,
           a: Math.random() * 0.5 + 0.2,
         }));
       }
@@ -697,6 +727,12 @@ class IntroLoader {
         this.playZoom('exit');
         this.loader?.classList.add('zoom-through');
         this.hero?.classList.add('hero--intro-reveal');
+
+        // Start live wallpaper here to save resources during loading
+        if (window.app?.liveWallpaper) {
+          window.app.liveWallpaper.start();
+        }
+
         document.body.classList.add('intro-hud-handoff');
         setTimeout(() => document.body.classList.remove('intro-hud-handoff'), 1200);
       }, 750);
@@ -1582,7 +1618,7 @@ class PortfolioApp {
 
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new PortfolioApp();
+  window.app = new PortfolioApp();
 });
 
 // Add some additional interactive features

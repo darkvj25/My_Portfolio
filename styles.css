@@ -1682,6 +1682,49 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  /* Performance optimizations for mobile */
+  .hud-overlay::after,
+  .live-wallpaper__grid {
+    display: none; /* Hide noise and grid on mobile */
+  }
+
+  .about, .skills, .footer, .navbar, .hud-progress, .hud-panel, .floating-card, .project-card, .skill-category, .contact-form {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .live-wallpaper__orb {
+    filter: blur(40px); /* Lower blur for mobile */
+    opacity: 0.3;
+  }
+
+  .section-outline-text {
+    display: none; /* Heavy on layout if animated */
+  }
+
+  .floating-card {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Simplify loader for mobile */
+  .loader-bg {
+    background-size: 100px 100px;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .loader-hud__crosshair, .loader-hud__label {
+    display: none;
+  }
+
+  .loader-particles {
+    opacity: 0.5;
+  }
+
+  .crack-line {
+    filter: none !important; /* Filters are expensive on mobile */
+  }
+
   .nav-container {
     padding: 0 1.5rem;
   }
