@@ -9,11 +9,15 @@ class PortfolioApp {
     this.contactForm = document.getElementById('contact-form');
     
     this.currentTheme = localStorage.getItem('theme') || 'light';
+
+    this.reduceMotionMql = window.matchMedia('(prefers-reduced-motion: reduce)');
+    this.reduceMotion = this.reduceMotionMql.matches;
     
     this.init();
   }
 
   init() {
+    this.setupReducedMotion();
     this.setupPageEntrance();
     this.setupEventListeners();
     this.setupTheme();
@@ -27,6 +31,16 @@ class PortfolioApp {
     this.setupMagneticEffect();
     this.setupCustomCursor();
     this.setupLightbox();
+    this.setupNavReticle();
+  }
+
+  setupReducedMotion() {
+    const apply = () => {
+      this.reduceMotion = this.reduceMotionMql.matches;
+      document.documentElement.toggleAttribute('data-reduce-motion', this.reduceMotion);
+    };
+    apply();
+    this.reduceMotionMql.addEventListener?.('change', apply);
   }
 
   setupPageEntrance() {
@@ -43,6 +57,17 @@ class PortfolioApp {
       'OPTIMIZING INTERFACE...',
       'SYSTEM READY'
     ];
+
+    // Reduced motion: keep boot short + no jittery loops
+    if (this.reduceMotion) {
+      if (loaderBar) loaderBar.style.width = `100%`;
+      if (loaderPercentage) loaderPercentage.textContent = `100%`;
+      if (loaderStatus) loaderStatus.textContent = statuses[statuses.length - 1];
+      setTimeout(() => {
+        loader?.classList.add('loaded');
+      }, 250);
+      return;
+    }
 
     // Simulate loading progress
     let progress = 0;
@@ -119,10 +144,8 @@ class PortfolioApp {
   updateScrollProgress() {
     const scrollTop = window.scrollY;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercent = (scrollTop / docHeight) * 100;
-    
-    // You can use this for a progress bar if needed
-    document.documentElement.style.setProperty('--scroll-progress', `${scrollPercent}%`);
+    const progress = docHeight > 0 ? (scrollTop / docHeight) : 0;
+    document.documentElement.style.setProperty('--scroll-progress', String(Math.max(0, Math.min(1, progress))));
   }
 
   toggleMobileMenu() {
@@ -499,6 +522,7 @@ class PortfolioApp {
     const links = document.querySelectorAll('a, button, .theme-toggle, .project-card');
 
     if (!cursor || !follower) return;
+    if (this.reduceMotion) return;
 
     window.addEventListener('mousemove', (e) => {
       const { clientX: x, clientY: y } = e;
@@ -530,12 +554,17 @@ class PortfolioApp {
     const closeBtn = document.querySelector('.lightbox-close');
     const prevBtn = document.querySelector('.lightbox-prev');
     const nextBtn = document.querySelector('.lightbox-next');
-    const projectCards = document.querySelectorAll('.project-card');
+    const openButtons = document.querySelectorAll('.project-open');
 
     let currentImages = [];
     let currentIndex = 0;
+    let lastFocused = null;
 
     if (!modal || !lightboxImg) return;
+
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-hidden', 'true');
 
     const updateLightboxImage = () => {
       lightboxImg.style.opacity = '0';
@@ -550,27 +579,37 @@ class PortfolioApp {
       nextBtn.style.display = showNav ? 'flex' : 'none';
     };
 
-    projectCards.forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('.project-link')) return;
+    const openFromCard = (card) => {
+      // Find all images in the card
+      const cardImages = Array.from(card.querySelectorAll('img')).map(img => img.src).filter(Boolean);
+      if (cardImages.length === 0) return;
 
-        // Find all images in the card
-        const cardImages = Array.from(card.querySelectorAll('img')).map(img => img.src);
+      currentImages = cardImages;
+      currentIndex = 0;
+      updateLightboxImage();
 
-        if (cardImages.length > 0) {
-          currentImages = cardImages;
-          currentIndex = 0;
-          updateLightboxImage();
+      // Add Title and Description to Lightbox
+      const title = card.querySelector('.project-title')?.textContent?.trim() || '';
+      const desc = card.querySelector('.project-description')?.textContent?.trim() || '';
+      const titleEl = document.getElementById('lightbox-title');
+      const descEl = document.getElementById('lightbox-desc');
+      if (titleEl) titleEl.textContent = title;
+      if (descEl) descEl.textContent = desc;
 
-          // Add Title and Description to Lightbox
-          const title = card.querySelector('.project-title').textContent;
-          const desc = card.querySelector('.project-description').textContent;
-          document.getElementById('lightbox-title').textContent = title;
-          document.getElementById('lightbox-desc').textContent = desc;
+      lastFocused = document.activeElement;
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      closeBtn?.focus?.();
+    };
 
-          modal.classList.add('active');
-          document.body.style.overflow = 'hidden';
-        }
+    openButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const card = btn.closest('.project-card');
+        if (!card) return;
+        openFromCard(card);
       });
     });
 
@@ -590,7 +629,9 @@ class PortfolioApp {
     const closeModal = () => {
       modal.classList.remove('active');
       document.body.style.overflow = '';
+      modal.setAttribute('aria-hidden', 'true');
       setTimeout(() => { lightboxImg.src = ''; currentImages = []; }, 300);
+      lastFocused?.focus?.();
     };
 
     closeBtn?.addEventListener('click', closeModal);
@@ -605,55 +646,80 @@ class PortfolioApp {
   }
 
   setupParallax() {
-    const parallaxShapes = document.querySelectorAll('.parallax-shape');
+    if (this.reduceMotion) return;
+
+    const parallaxShapes = Array.from(document.querySelectorAll('.parallax-shape'));
     const heroContent = document.querySelector('.hero-content');
-    const outlineTexts = document.querySelectorAll('.section-outline-text');
+    const outlineTexts = Array.from(document.querySelectorAll('.section-outline-text'));
     const heroSection = document.querySelector('.hero');
 
-    // Mouse movement parallax for hero background
-    if (heroSection) {
-      heroSection.addEventListener('mousemove', (e) => {
-        const { clientX: x, clientY: y } = e;
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
+    if (!parallaxShapes.length && !heroContent && !outlineTexts.length) return;
 
-        const moveX = (x - centerX) / 50;
-        const moveY = (y - centerY) / 50;
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const state = { mx: 0, my: 0, ticking: false };
 
-        parallaxShapes.forEach(shape => {
-          const speed = parseFloat(shape.getAttribute('data-speed')) || 0.1;
-          shape.style.transform = `translate(${moveX * speed * 20}px, ${moveY * speed * 20}px) translateY(${window.scrollY * speed}px)`;
-        });
-      });
-    }
-
-    const updateParallax = () => {
-      const scrollY = window.scrollY;
-
-      // Parallax for Hero text
-      if (heroContent) {
-        const speed = parseFloat(heroContent.getAttribute('data-speed')) || 0.3;
-        heroContent.style.transform = `translateY(${scrollY * speed}px)`;
-        heroContent.style.opacity = 1 - (scrollY / 800);
-      }
-
-      // Horizontal scroll for outline texts with varying speeds
-      outlineTexts.forEach((text, index) => {
-        const rect = text.parentElement.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0) {
-          const direction = index % 2 === 0 ? 1 : -1;
-          const moveX = (window.innerHeight - rect.top) * 0.15 * direction;
-          text.style.transform = `translate(calc(-50% + ${moveX}px), -50%) skewX(${moveX * 0.02}deg)`;
-        }
-      });
-
-      requestAnimationFrame(updateParallax);
+    const requestTick = () => {
+      if (state.ticking) return;
+      state.ticking = true;
+      requestAnimationFrame(update);
     };
 
-    requestAnimationFrame(updateParallax);
+    const update = () => {
+      state.ticking = false;
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      const vh = window.innerHeight || 1;
+
+      // Mouse + scroll parallax for background shapes
+      for (const shape of parallaxShapes) {
+        const speed = parseFloat(shape.getAttribute('data-speed')) || 0.1;
+        const tx = clamp(state.mx * speed * 18, -26, 26);
+        const ty = clamp(state.my * speed * 18 + scrollY * speed * 0.12, -44, 44);
+        shape.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+      }
+
+      // Hero panel parallax: small + fades slightly, but clamped
+      if (heroContent) {
+        const speed = parseFloat(heroContent.getAttribute('data-speed')) || 0.15;
+        const ty = clamp(scrollY * speed * 0.2, 0, 40);
+        heroContent.style.transform = `translate3d(0, ${ty}px, 0)`;
+        heroContent.style.opacity = String(clamp(1 - (scrollY / 900), 0.65, 1));
+      }
+
+      // Outline texts: gentle horizontal drift while visible
+      outlineTexts.forEach((text, index) => {
+        const parent = text.parentElement;
+        if (!parent) return;
+        const rect = parent.getBoundingClientRect();
+        if (rect.top < vh && rect.bottom > 0) {
+          const direction = index % 2 === 0 ? 1 : -1;
+          const progress = (vh - rect.top) / vh; // 0..~2
+          const moveX = clamp((progress - 0.5) * 42, -40, 40) * direction;
+          text.style.transform = `translate(calc(-50% + ${moveX}px), -50%) skewX(${moveX * 0.06}deg)`;
+        }
+      });
+    };
+
+    const onMouseMove = (e) => {
+      // normalize to [-1..1]
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = (e.clientY / window.innerHeight) * 2 - 1;
+      state.mx = clamp(x, -1, 1);
+      state.my = clamp(y, -1, 1);
+      requestTick();
+    };
+
+    const onScroll = () => requestTick();
+    const onResize = () => requestTick();
+
+    heroSection?.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize, { passive: true });
+
+    requestTick();
   }
 
   setupTiltEffect() {
+    if (this.reduceMotion) return;
     // 1. Special Handling for Hero Card (uses container for max stability)
     const heroContainer = document.querySelector('.hero-visual');
     const heroCard = document.querySelector('.floating-card');
@@ -679,7 +745,7 @@ class PortfolioApp {
     }
 
     // 2. Generic Tilt for other elements
-    const otherCards = document.querySelectorAll('.project-card, .skill-category, .image-container');
+    const otherCards = document.querySelectorAll('.skill-category, .image-container');
 
     otherCards.forEach(card => {
       card.addEventListener('mousemove', (e) => {
@@ -692,7 +758,7 @@ class PortfolioApp {
         const rotateY = (x - centerX) / 20;
 
         card.style.transition = 'none';
-        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02) translateY(-5px)`;
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
         if (card.classList.contains('project-card')) {
           const lightX = (x / rect.width) * 100;
@@ -712,6 +778,7 @@ class PortfolioApp {
 
 
   setupMagneticEffect() {
+    if (this.reduceMotion) return;
     const magneticElements = document.querySelectorAll('.btn, .social-link, .nav-logo');
 
     magneticElements.forEach(el => {
@@ -738,9 +805,49 @@ class PortfolioApp {
         once: true,
         offset: 50,
         delay: 0,
-        anchorPlacement: 'top-bottom'
+        anchorPlacement: 'top-bottom',
+        disable: this.reduceMotion
       });
     }
+  }
+
+  setupNavReticle() {
+    const menu = this.navMenu;
+    if (!menu) return;
+
+    const reticle = menu.querySelector('.nav-reticle');
+    const links = Array.from(menu.querySelectorAll('.nav-link'));
+    if (!reticle || links.length === 0) return;
+
+    const moveTo = (link) => {
+      const menuRect = menu.getBoundingClientRect();
+      const rect = link.getBoundingClientRect();
+      const x = rect.left - menuRect.left - 10;
+      const w = rect.width + 20;
+      reticle.style.width = `${w}px`;
+      reticle.style.transform = `translate3d(${x}px, -50%, 0)`;
+    };
+
+    const active = () => links.find(l => l.classList.contains('active')) || links[0];
+    const sync = () => moveTo(active());
+
+    // show reticle after first layout
+    requestAnimationFrame(() => {
+      menu.classList.add('is-ready');
+      sync();
+    });
+
+    links.forEach(link => {
+      link.addEventListener('mouseenter', () => moveTo(link), { passive: true });
+      link.addEventListener('focus', () => moveTo(link));
+    });
+
+    menu.addEventListener('mouseleave', sync, { passive: true });
+    window.addEventListener('resize', sync, { passive: true });
+
+    // watch active class changes (IntersectionObserver updates it)
+    const mo = new MutationObserver(sync);
+    mo.observe(menu, { subtree: true, attributes: true, attributeFilter: ['class'] });
   }
 
   handleKeydown(e) {
@@ -804,6 +911,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Add some additional interactive features
 document.addEventListener('DOMContentLoaded', () => {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   // Add typing animation to hero section
   const heroTitle = document.querySelector('.hero-title');
   if (heroTitle) {
@@ -821,9 +930,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.head.appendChild(style);
   }
 
-  // Add click animation to buttons
-  document.querySelectorAll('.btn').forEach(button => {
-    button.addEventListener('click', function(e) {
+  // Add click animation to buttons (skip on reduced motion)
+  if (!reduceMotion) document.querySelectorAll('.btn').forEach(button => {
+    button.addEventListener('click', function (e) {
       const ripple = document.createElement('span');
       const rect = this.getBoundingClientRect();
       const size = Math.max(rect.width, rect.height);
@@ -852,7 +961,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Add the ripple animation
-  if (!document.querySelector('#ripple-animation')) {
+  if (!reduceMotion && !document.querySelector('#ripple-animation')) {
     const rippleStyle = document.createElement('style');
     rippleStyle.id = 'ripple-animation';
     rippleStyle.textContent = `

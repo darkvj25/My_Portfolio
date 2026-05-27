@@ -47,6 +47,9 @@
     <div class="custom-cursor"></div>
     <div class="cursor-follower"></div>
 
+    <!-- HUD Overlay (scanlines/noise) -->
+    <div class="hud-overlay" aria-hidden="true"></div>
+
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
       <div class="nav-container">
@@ -57,6 +60,7 @@
         </div>
         
         <ul class="nav-menu" id="nav-menu">
+          <span class="nav-reticle" aria-hidden="true"></span>
           <li class="nav-item">
             <a href="#home" class="nav-link">Home</a>
           </li>
@@ -89,6 +93,11 @@
       </div>
     </nav>
 
+    <!-- HUD Scroll Progress -->
+    <div class="hud-progress" aria-hidden="true">
+      <div class="hud-progress__bar"></div>
+    </div>
+
     <!-- Hero Section -->
     <section class="hero" id="home">
       <!-- Parallax Background Image -->
@@ -102,8 +111,12 @@
       <div class="parallax-shape shape-3" data-speed="0.15"></div>
 
       <div class="hero-container">
-        <div class="hero-content" data-aos="fade-up" data-aos-duration="1000" data-speed="0.4">
+        <div class="hero-content hud-panel hud-corners" data-aos="fade-up" data-aos-duration="1000" data-speed="0.4">
           <div class="hero-text">
+            <div class="hero-status">
+              <span class="status-chip" data-state="ok"><i></i><span>SYSTEM: ONLINE</span></span>
+              <span class="status-chip" data-state="warn"><i></i><span>BUILD: PORTFOLIO</span></span>
+            </div>
             <h1 class="hero-title">
               Hi, I'm <span class="gradient-text">Van Jasper Benzon</span>
             </h1>
@@ -259,6 +272,7 @@
     <div class="projects-grid">
       <!-- Project 1 -->
       <div class="project-card" data-aos="zoom-in-up" data-aos-duration="1000">
+        <button class="project-open" type="button" aria-label="Open PensionPOS System gallery"></button>
 
         <div class="project-image dual-mockup">
           <div class="mockup-bg">
@@ -290,6 +304,7 @@
 
       <!-- Project 2 -->
       <div class="project-card" data-aos="zoom-in-up" data-aos-duration="1000" data-aos-delay="200">
+        <button class="project-open" type="button" aria-label="Open RetailPOS System gallery"></button>
 
         <div class="project-image dual-mockup">
           <div class="mockup-bg">
@@ -336,6 +351,7 @@
 
       <!-- Project 3 -->
       <div class="project-card" data-aos="zoom-in-up" data-aos-duration="1000" data-aos-delay="400">
+        <button class="project-open" type="button" aria-label="Open ProfitMonitor System gallery"></button>
 
         <div class="project-image dual-mockup">
           <div class="mockup-bg">
@@ -364,6 +380,106 @@
           </div>
         </div>
       </div>
+
+      <!-- Project 4 -->
+      <div class="project-card" data-aos="zoom-in-up" data-aos-duration="1000" data-aos-delay="600">
+        <button class="project-open" type="button" aria-label="Open Service Reservation & Monitoring System gallery"></button>
+        <div class="project-image dual-mockup">
+          <div class="mockup-bg">
+            <img src="samlou_dash.png" alt="Project 4 Background">
+          </div>
+          <div class="mockup-fg">
+            <img src="samlou_land.png" alt="Project 4 Foreground">
+          </div>
+          <div class="project-overlay">
+            <div class="project-links">
+              <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+              <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="project-content">
+          <h3 class="project-title">Service Reservation & Monitoring System</h3>
+          <p class="project-description">
+            A robust web-based management application designed to streamline the scheduling and tracking of communal resources for the local government of Irosin. It automates the reservation lifecycle for service trucks, tents, and parabolics, featuring real-time status monitoring, conflict detection, and interactive map-based tracking across 28 barangays. Built with a Progressive Web App (PWA) architecture, it ensures reliable offline access and data integrity for public service accountability.          </p>
+          <div class="project-tech">
+            <span class="tech-tag">Java</span>
+            <span class="tech-tag">MySQL</span>
+            <span class="tech-tag">PWA</span>
+            <span class="tech-tag">PHP</span>
+            <span class="tech-tag">BOOTSTRAP5</span>
+            <span class="tech-tag">LEAFLET</span>
+            <span class="tech-tag">PDO</span>
+
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 5 -->
+      <div class="project-card" data-aos="zoom-in-up" data-aos-duration="1000" data-aos-delay="800">
+        <button class="project-open" type="button" aria-label="Open Ice Cream POS System gallery"></button>
+        <div class="project-image dual-mockup">
+          <div class="mockup-bg">
+            <img src="ice_pos.png" alt="Ice Cream POS Background">
+          </div>
+          <div class="mockup-fg">
+            <img src="ice_login.png" alt="Ice Cream POS Foreground">
+          </div>
+          <div class="project-overlay">
+            <div class="project-links">
+              <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+              <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="project-content">
+          <h3 class="project-title">Ice Cream POS System</h3>
+          <p class="project-description">
+            A modern, web-based Point-of-Sale (POS) system tailored for ice cream parlors. It streamlines the ordering process with features for real-time inventory tracking, category-based product management, and multi-role access for Admins and Cashiers. The system supports various payment methods including Cash, GCash, and Maya, ensuring a seamless checkout experience for both dine-in and takeout customers.          </p>
+          <div class="project-tech">
+            <span class="tech-tag">PHP</span>
+            <span class="tech-tag">MySQL</span>
+            <span class="tech-tag">JavaScript</span>
+            <span class="tech-tag">Bootstrap</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 6 -->
+      <div class="project-card" data-aos="zoom-in-up" data-aos-duration="1000" data-aos-delay="1000">
+        <button class="project-open" type="button" aria-label="Open Fin: Smart Expense Tracker gallery"></button>
+        <div class="project-image dual-mockup">
+          <div class="mockup-bg">
+            <img src="expense_dash.png" alt="Student System Background">
+          </div>
+          <div class="mockup-fg">
+            <img src="expense_login.png" alt="Student System Foreground">
+          </div>
+          <div class="project-overlay">
+            <div class="project-links">
+              <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+              <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="project-content">
+          <h3 class="project-title">Fin: Smart Expense Tracker</h3>
+          <p class="project-description">
+            A modern, AI-powered financial management system designed to simplify expense tracking. Featuring "Fin," an interactive assistant that provides real-time guidance, budget insights, and smart notifications to help you master your personal finances through a seamless PWA experience.          </p>
+          <div class="project-tech">
+            <span class="tech-tag">JAVASCRIPT</span>
+            <span class="tech-tag">MySQL</span>
+            <span class="tech-tag">PHP</span>
+            <span class="tech-tag">TAILWIND CSS</span>
+            <span class="tech-tag">PWA</span>
+            <span class="tech-tag">AI ASSISTANT</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 7 -->
+
     </div>
   </div>
 </section>
@@ -629,7 +745,7 @@
 
     <!-- Image Lightbox Modal -->
     <div id="lightbox-modal" class="lightbox-modal">
-      <span class="lightbox-close">&times;</span>
+      <button class="lightbox-close" type="button" aria-label="Close lightbox">&times;</button>
       <button class="lightbox-nav lightbox-prev" aria-label="Previous Image">
         <i class="fas fa-chevron-left"></i>
       </button>
