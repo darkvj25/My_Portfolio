@@ -1783,10 +1783,19 @@ class PortfolioApp {
   }
 
   setupThreeDModel() {
+    const isMobile = window.innerWidth < 768;
+    const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+
+    // Adjust scale based on device
+    let modelScale = 14.0;
+    if (isMobile) modelScale = 7.0;
+    else if (isTablet) modelScale = 10.0;
+
     this.threeDModel = new ThreeDModel('canvas3d-container', 'pc.fbx', {
-      scale: 14.0,
-      yOffset: 0,
-      cameraZ: 10
+      scale: modelScale,
+      yOffset: isMobile ? -1 : 0, // Slight offset for better framing on mobile
+      cameraZ: 10,
+      enableControls: !isMobile && !isTablet
     });
   }
 

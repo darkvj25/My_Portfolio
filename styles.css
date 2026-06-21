@@ -1708,6 +1708,11 @@ h1, h2, h3, h4, h5, h6 {
     display: none; /* Hide noise and grid on mobile */
   }
 
+  .canvas3d-container {
+    pointer-events: none !important;
+    height: 600px !important;
+  }
+
   .about, .skills, .footer, .navbar, .hud-progress, .hud-panel, .floating-card, .project-card, .skill-category, .contact-form {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
