@@ -20,15 +20,21 @@ class ThreeDModel {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(75, this.container.clientWidth / this.container.clientHeight, 0.1, 2000);
-    this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, logarithmicDepthBuffer: true });
+    const isMobile = window.innerWidth < 768;
+    this.renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: !isMobile, // Disable antialias on mobile for performance
+      logarithmicDepthBuffer: true
+    });
     this.clock = new THREE.Clock();
 
     this.init();
   }
 
   init() {
+    const isMobile = window.innerWidth < 768;
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1 : 2));
     this.container.appendChild(this.renderer.domElement);
 
     // Controls
@@ -228,8 +234,8 @@ class LiveWallpaper {
   initParticles() {
     const isMobile = window.innerWidth < 768;
     const area = this.width * this.height;
-    const density = this.reduceMotion ? 0.000015 : (isMobile ? 0.00003 : 0.000055);
-    const count = Math.min(isMobile ? 60 : 140, Math.max(isMobile ? 20 : 35, Math.floor(area * density)));
+    const density = this.reduceMotion ? 0.00001 : (isMobile ? 0.00002 : 0.000055);
+    const count = Math.min(isMobile ? 30 : 140, Math.max(isMobile ? 10 : 35, Math.floor(area * density)));
 
     this.particles = Array.from({ length: count }, () => this.createParticle(true));
   }
@@ -1438,6 +1444,7 @@ class PortfolioApp {
   }
 
   setupCustomCursor() {
+    if (window.innerWidth < 1024) return; // Disable on tablets and mobile
     const cursor = document.querySelector('.custom-cursor');
     const follower = document.querySelector('.cursor-follower');
     const links = document.querySelectorAll('a, button, .theme-toggle, .project-card');
@@ -1640,7 +1647,7 @@ class PortfolioApp {
   }
 
   setupTiltEffect() {
-    if (this.reduceMotion) return;
+    if (this.reduceMotion || window.innerWidth < 1024) return;
     // 1. Special Handling for Hero Card (uses container for max stability)
     const heroContainer = document.querySelector('.hero-visual');
     const heroCard = document.querySelector('.floating-card');
