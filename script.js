@@ -1,4 +1,170 @@
 
+class ThreeDModel {
+  constructor(containerId, modelPath, config = {}) {
+    this.container = document.getElementById(containerId);
+    if (!this.container) return;
+
+    this.modelPath = modelPath;
+    this.config = {
+      autoRotate: true,
+      autoRotateSpeed: 2.0,
+      enableControls: true,
+      scale: 14.0,
+      yOffset: 0,
+      yRotation: 0,
+      cameraZ: 10,
+      loopAnimations: true,
+      onFinished: null,
+      ...config
+    };
+
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(75, this.container.clientWidth / this.container.clientHeight, 0.1, 2000);
+    this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, logarithmicDepthBuffer: true });
+    this.clock = new THREE.Clock();
+
+    this.init();
+  }
+
+  init() {
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.container.appendChild(this.renderer.domElement);
+
+    // Controls
+    if (this.config.enableControls && typeof THREE.OrbitControls !== 'undefined') {
+      this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.05;
+      this.controls.enableZoom = false;
+      this.controls.autoRotate = this.config.autoRotate;
+      this.controls.autoRotateSpeed = this.config.autoRotateSpeed;
+    }
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    this.scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 5, 5);
+    this.scene.add(directionalLight);
+
+    const pointLight = new THREE.PointLight(0x6366f1, 2, 10);
+    pointLight.position.set(-2, 2, 2);
+    this.scene.add(pointLight);
+
+    this.camera.position.z = this.config.cameraZ;
+
+    this.loadModel();
+    this.animate();
+
+    this.resizeHandler = () => this.onWindowResize();
+    window.addEventListener('resize', this.resizeHandler);
+  }
+
+  loadModel() {
+    const isFBX = this.modelPath.toLowerCase().endsWith('.fbx');
+    const loader = isFBX ? new THREE.FBXLoader() : new THREE.GLTFLoader();
+
+    loader.load(this.modelPath, (result) => {
+      const object = isFBX ? result : result.scene;
+
+      // Reset transform
+      object.position.set(0, 0, 0);
+      object.scale.set(1, 1, 1);
+      object.rotation.set(0, this.config.yRotation, 0);
+
+      // 1. Calculate size and scale
+      let box = new THREE.Box3().setFromObject(object);
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const scale = this.config.scale / maxDim;
+      object.scale.set(scale, scale, scale);
+
+      // 2. Recalculate box after scaling to get accurate center
+      object.updateMatrixWorld(true);
+      box.setFromObject(object);
+      const center = box.getCenter(new THREE.Vector3());
+
+      // 3. Center the model exactly
+      object.position.x = -center.x;
+      object.position.y = -center.y + this.config.yOffset;
+      object.position.z = -center.z;
+
+      this.model = object;
+      this.scene.add(object);
+
+      // Handle Animations
+      if (result.animations && result.animations.length > 0) {
+        this.mixer = new THREE.AnimationMixer(object);
+        result.animations.forEach(clip => {
+          const action = this.mixer.clipAction(clip);
+          if (!this.config.loopAnimations) {
+            action.setLoop(THREE.LoopOnce);
+            action.clampWhenFinished = true;
+          }
+          action.play();
+        });
+
+        if (this.config.onFinished) {
+          this.mixer.addEventListener('finished', () => {
+            this.config.onFinished();
+          });
+        }
+      }
+
+      // Update controls target to the new center
+      if (this.controls) {
+        this.controls.target.set(0, 0, 0);
+      }
+    },
+    (xhr) => {
+      // Progress
+    },
+    (error) => {
+      console.error('An error happened while loading the 3D model:', error);
+    });
+  }
+
+  onWindowResize() {
+    if (!this.container) return;
+    this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+  }
+
+  animate() {
+    this.rafId = requestAnimationFrame(() => this.animate());
+
+    const delta = this.clock.getDelta();
+
+    if (this.mixer) {
+      this.mixer.update(delta);
+    }
+
+    if (this.controls) {
+      this.controls.update();
+    }
+
+    if (!this.controls && this.model) {
+      this.model.rotation.y += 0.01;
+    }
+
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  destroy() {
+    if (this.rafId) cancelAnimationFrame(this.rafId);
+    if (this.renderer) {
+      this.renderer.dispose();
+      this.renderer.forceContextLoss();
+      this.renderer.domElement.remove();
+    }
+    window.removeEventListener('resize', this.resizeHandler);
+  }
+}
+
+
 class LiveWallpaper {
   constructor({ reduceMotion = false } = {}) {
     this.canvas = document.getElementById('live-wallpaper-canvas');
@@ -234,6 +400,18 @@ class IntroLoader {
     this.hero = document.querySelector('[data-intro-hero]');
     this.audioGate = document.getElementById('loader-audio-gate');
 
+    this.robotModel = new ThreeDModel('loader-robot-container', 'glb/robot.glb', {
+      enableControls: false,
+      scale: 12.0,
+      yRotation: -Math.PI / 2, // Rotate 90 degrees to face forward
+      autoRotate: false,
+      loopAnimations: false,
+      onFinished: () => {
+        this.animationFinished = true;
+        this.checkReadyToEnter();
+      }
+    });
+
     this.soundEnabled = true;
     this.introStarted = false;
     this.audioUnlocked = false;
@@ -247,6 +425,7 @@ class IntroLoader {
     this.milestonesHit = new Set();
     this.verifying = false;
     this.finished = false;
+    this.animationFinished = false; // New flag
     this.particleRaf = null;
     this.particles = [];
 
@@ -323,11 +502,33 @@ class IntroLoader {
   }
 
   async enableAudio() {
-    if (this.introStarted) return;
+    if (this.introStarted) {
+      this.skipToEnd();
+      return;
+    }
     this.introStarted = true;
 
     this.audioGate?.classList.add('is-dismissed');
+
+    // Allow clicking anywhere on the loader to skip once it has started
+    this.loader?.addEventListener('click', (e) => {
+      if (e.target.closest('.loader-audio-gate')) return;
+      this.skipToEnd();
+    });
+
     await this.unlockAudio();
+  }
+
+  skipToEnd() {
+    if (this.finished) return;
+
+    // Fast-forward progress
+    this.progress = 100;
+    this.animationFinished = true;
+    this.setProgress(100);
+
+    // Trigger the exit sequence
+    this.playCrackSequence();
   }
 
   async unlockAudio() {
@@ -703,10 +904,20 @@ class IntroLoader {
           this.progress = 100;
           this.setProgress(100);
           this.typeStatus(this.statuses[this.statuses.length - 1]);
-          setTimeout(() => this.playCrackSequence(), 450);
+          this.checkReadyToEnter();
         }, 900);
       }
     }, 55);
+  }
+
+  checkReadyToEnter() {
+    // Only enter if progress is 100% AND the robot animation is done
+    if (this.progress >= 100 && this.animationFinished && !this.finished) {
+      setTimeout(() => this.playCrackSequence(), 450);
+    } else if (this.progress >= 100 && !this.animationFinished) {
+      // Optional: keep the user informed if assets are ready but animation is still playing
+      if (this.statusEl) this.statusEl.textContent = "SYNCHRONIZING ANIMATION...";
+    }
   }
 
   playCrackSequence() {
@@ -742,6 +953,7 @@ class IntroLoader {
   }
 
   dismissLoader(animated) {
+    this.robotModel?.destroy();
     document.body.classList.remove('is-intro-loading');
     this.loader?.classList.remove('cracking', 'crack-heal', 'zoom-through');
     this.loader?.classList.add('loaded');
@@ -793,6 +1005,7 @@ class PortfolioApp {
     this.setupLightbox();
     this.setupNavReticle();
     this.setupLiveWallpaper();
+    this.setupThreeDModel();
   }
 
   setupReducedMotion() {
@@ -1560,6 +1773,14 @@ class PortfolioApp {
 
   setupLiveWallpaper() {
     this.liveWallpaper = new LiveWallpaper({ reduceMotion: this.reduceMotion });
+  }
+
+  setupThreeDModel() {
+    this.threeDModel = new ThreeDModel('canvas3d-container', 'glb/pc.fbx', {
+      scale: 14.0,
+      yOffset: 0,
+      cameraZ: 10
+    });
   }
 
   handleKeydown(e) {

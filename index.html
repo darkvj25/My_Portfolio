@@ -21,6 +21,16 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="styles.css">
 
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Loaders -->
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/FBXLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- OrbitControls -->
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/controls/OrbitControls.js"></script>
+    <!-- fflate for FBXLoader -->
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.7.4/umd/index.min.js"></script>
+
     <meta property="og:title" content="Van Jasper Benzon - Web Developer Portfolio" />
     <meta property="og:description" content="Web Developer Portfolio" />
     <meta property="og:type" content="website" />
@@ -41,6 +51,7 @@
 
     <!-- Page Loader / Entrance Animation -->
     <div class="loader" id="loader">
+      <div id="loader-robot-container" class="loader-robot-container"></div>
       <div class="loader-bg" id="loader-bg"></div>
       <canvas class="loader-particles" id="loader-particles" aria-hidden="true"></canvas>
       <div class="loader-scan-sweep" aria-hidden="true"></div>
@@ -327,6 +338,7 @@
   <div class="container">
 
     <div class="section-header" data-aos="fade-up">
+      <div id="canvas3d-container" class="canvas3d-container"></div>
       <span class="section-outline-text">WORKS</span>
       <h2 class="section-title">Featured Projects</h2>
       <p class="section-subtitle">Some of the projects I built during my academic journey</p>
