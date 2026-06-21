@@ -400,7 +400,7 @@ class IntroLoader {
     this.hero = document.querySelector('[data-intro-hero]');
     this.audioGate = document.getElementById('loader-audio-gate');
 
-    this.robotModel = new ThreeDModel('loader-robot-container', 'glb/robot.glb', {
+    this.robotModel = new ThreeDModel('loader-robot-container', 'robot.glb', {
       enableControls: false,
       scale: 12.0,
       yRotation: -Math.PI / 2, // Rotate 90 degrees to face forward
@@ -1776,7 +1776,7 @@ class PortfolioApp {
   }
 
   setupThreeDModel() {
-    this.threeDModel = new ThreeDModel('canvas3d-container', 'glb/pc.fbx', {
+    this.threeDModel = new ThreeDModel('canvas3d-container', 'pc.fbx', {
       scale: 14.0,
       yOffset: 0,
       cameraZ: 10
